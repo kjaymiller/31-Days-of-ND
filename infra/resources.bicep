@@ -5,6 +5,9 @@ param tags object
 
 var prefix = '${name}-${resourceToken}'
 
+var appServicePlanName = '${prefix}-plan'
+
+
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: '${prefix}-logworkspace'
   location: location
@@ -31,7 +34,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
   }
 }
 
-var validStoragePrefix = take(replace(prefix, '-', ''), 17)
+var validStoragePrefix = toLower(take(replace(prefix, '-', ''), 17))
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   name: '${validStoragePrefix}storage'
@@ -43,12 +46,20 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   }
 }
 
-var az_conn_string = 'DefaultEndpointsProtocol=https;AccountName=${name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
-output name string = storageAccount.name
-output AZURE_STORAGE_CONNECTION_STRING string = az_conn_string
+resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
+  name: appServicePlanName
+  location: location
+  tags: tags
+  kind: 'functionapp'
+  properties: {
+    reserved: true
+  }
+  sku: {
+    name: 'Y1' 
+  }
+}
 
-
-resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
+resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
   name: '${prefix}-function-app'
   location: location
   tags: union(tags, {
@@ -57,7 +68,7 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
   kind: 'functionapp,linux'
   properties: {
     httpsOnly: true
-    serverFarmId: appServicePlan.id
+    serverFarmId: hostingPlan.id
     clientAffinityEnabled: false
     siteConfig: {
       linuxFxVersion: 'Python|3.9'
@@ -65,6 +76,10 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
         {
            name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
            value: appInsights.properties.InstrumentationKey
+        }
+        {
+          name: 'AzureWebJobsStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -76,11 +91,11 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'AZURE_STORAGE_CONNECTION_STRING'
-          value: az_conn_string
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
         }
         {
           name: 'AZURE_STORAGE_QUEUE_NAME'
-          value: toLower(uniqueString(name)) 
+          value: resourceToken
         }
         {
           name: 'ENABLE_ORYX_BUILD'
@@ -101,7 +116,7 @@ resource web 'Microsoft.Web/sites@2022-03-01' = {
   tags: union(tags, { 'azd-service-name': 'web' })
   kind: 'app,linux'
   properties: {
-    serverFarmId: appServicePlan.id
+    serverFarmId: WebappServicePlan.id
     siteConfig: {
       alwaysOn: true
       linuxFxVersion: 'PYTHON|3.10'
@@ -114,8 +129,8 @@ resource web 'Microsoft.Web/sites@2022-03-01' = {
     name: 'appsettings'
     properties: {
       SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
-      AZURE_STORAGE_CONNECTION_STRING: az_conn_string
-      AZURE_STORAGE_QUEUE_NAME: toLower(uniqueString(name))
+      AZURE_STORAGE_CONNECTION_STRING: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
+      AZURE_STORAGE_QUEUE_NAME: resourceToken
     }
   }
 
@@ -144,7 +159,7 @@ resource web 'Microsoft.Web/sites@2022-03-01' = {
   }
 }
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
+resource WebappServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: '${prefix}-service-plan'
   location: location
   tags: tags
@@ -158,3 +173,4 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 
 
 output application_url string = functionApp.properties.hostNames[0]
+
