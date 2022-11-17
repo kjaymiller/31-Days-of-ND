@@ -6,6 +6,7 @@ from flask import (
 import os
 import json
 from azure.storage.queue import QueueClient
+from azqueuetweeter import storage, twitter
 
 
 queue = QueueClient.from_connection_string(
@@ -19,19 +20,23 @@ except:
     pass
 
 def load_msg():
-    raw_msg = queue.receive_message().content
-    return json.loads(raw_msg)['text']
+    return queue.receive_message().content
     
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
+    try:
+        msg = load_msg()
+    except:
+        msg = "There is no message in the queue"
     return render_template('index.html', message=load_msg())
 
-@app.route('/message')
+@app.route('/message', methods="POST")
 def message():
-    return load_msg()
+    
 
 if __name__ == '__main__':
     app.run() 
