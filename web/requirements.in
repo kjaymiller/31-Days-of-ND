@@ -1,4 +1,6 @@
 flask
+flask-wtf
+wtforms
 python-dotenv
 azure-storage-queue
 azqueuetweeter

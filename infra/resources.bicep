@@ -46,20 +46,18 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   }
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2020-10-01' = {
+resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: appServicePlanName
   location: location
-  tags: tags
-  kind: 'functionapp'
-  properties: {
-    reserved: true
-  }
   sku: {
-    name: 'Y1' 
+    name: 'Y1'
+    tier: 'Dynamic'
   }
+  properties: {}
 }
 
-resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
+
+resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: '${prefix}-function-app'
   location: location
   tags: union(tags, {
@@ -71,7 +69,6 @@ resource functionApp 'Microsoft.Web/sites@2020-06-01' = {
     serverFarmId: hostingPlan.id
     clientAffinityEnabled: false
     siteConfig: {
-      linuxFxVersion: 'Python|3.9'
       appSettings: [
         {
            name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
