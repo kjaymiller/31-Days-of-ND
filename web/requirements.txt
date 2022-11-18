@@ -27,6 +27,10 @@ click==8.1.3
 cryptography==38.0.3
     # via azure-storage-queue
 flask==2.2.2
+    # via
+    #   -r requirements.in
+    #   flask-wtf
+flask-wtf==1.0.1
     # via -r requirements.in
 idna==3.4
     # via requests
@@ -35,13 +39,16 @@ importlib-metadata==5.0.0
 isodate==0.6.1
     # via msrest
 itsdangerous==2.1.2
-    # via flask
+    # via
+    #   flask
+    #   flask-wtf
 jinja2==3.1.2
     # via flask
 markupsafe==2.1.1
     # via
     #   jinja2
     #   werkzeug
+    #   wtforms
 msrest==0.7.1
     # via azure-storage-queue
 oauthlib==3.2.2
@@ -74,5 +81,9 @@ urllib3==1.26.12
     # via requests
 werkzeug==2.2.2
     # via flask
+wtforms==3.0.1
+    # via
+    #   -r requirements.in
+    #   flask-wtf
 zipp==3.10.0
     # via importlib-metadata

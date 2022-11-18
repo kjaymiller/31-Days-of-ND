@@ -157,6 +157,10 @@ resource web 'Microsoft.Web/sites@2022-03-01' = {
       SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
       AZURE_STORAGE_CONNECTION_STRING: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${az.environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
       AZURE_STORAGE_QUEUE_NAME: resourceToken
+      TWITTER_CONSUMER_SECRET: twitterConsumerKey 
+      TWITTER_CONSUMER_KEY: twitterConsumerSecret
+      TWITTER_ACCESS_TOKEN: twitterAccessToken
+      TWITTER_ACCESS_TOKEN_SECRET: twitterAccessTokenSecret
     }
   }
 
