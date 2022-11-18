@@ -3,6 +3,19 @@ param location string = resourceGroup().location
 param resourceToken string
 param tags object
 
+@secure()
+param twitterConsumerKey string
+
+@secure()
+param twitterConsumerSecret string
+
+@secure()
+param twitterAccessToken string
+
+@secure()
+param twitterAccessTokenSecret string
+
+
 var prefix = '${name}-${resourceToken}'
 
 var appServicePlanName = '${prefix}-plan'
@@ -101,6 +114,22 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
           value: 'true'
+        }
+        {
+          name: 'TWITTER_CONSUMER_SECRET'
+          value: twitterConsumerKey 
+        }
+        {
+          name: 'TWITTER_CONSUMER_KEY'
+          value: twitterConsumerSecret
+        }
+        {
+          name: 'TWITTER_ACCESS_TOKEN'
+          value: twitterAccessToken
+        }
+        {
+          name: 'TWITTER_ACCESS_TOKEN_SECRET'
+          value: twitterAccessTokenSecret
         }
       ]
     }

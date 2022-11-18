@@ -7,6 +7,18 @@
         },
         "location": {
         "value": "${AZURE_LOCATION}"
+        },
+        "twitterAccessToken": {
+            "value": "${TWITTER_ACCESS_TOKEN}"
+        },
+        "twitterAccessTokenSecret": {
+            "value": "${TWITTER_ACCESS_TOKEN_SECRET}"
+        },
+        "twitterConsumerKey": {
+            "value": "${TWITTER_CONSUMER_KEY}"
+        },
+        "twitterConsumerSecret": {
+            "value": "${TWITTER_CONSUMER_SECRET}"
         }
     }
 }

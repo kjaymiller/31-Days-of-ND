@@ -1,4 +1,15 @@
 targetScope = 'subscription'
+@secure()
+param twitterConsumerKey string
+
+@secure()
+param twitterConsumerSecret string
+
+@secure()
+param twitterAccessToken string
+
+@secure()
+param twitterAccessTokenSecret string
 
 @minLength(1)
 @maxLength(64)
@@ -26,6 +37,10 @@ module resources 'resources.bicep' = {
     location: location
     resourceToken: resourceToken
     tags: tags
+    twitterConsumerKey: twitterConsumerKey
+    twitterConsumerSecret: twitterConsumerSecret
+    twitterAccessToken: twitterAccessToken
+    twitterAccessTokenSecret: twitterAccessTokenSecret
   }
 }
 

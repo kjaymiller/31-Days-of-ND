@@ -14,11 +14,8 @@ import os
 import json
 from azure.storage.queue import QueueClient
 from azqueuetweeter import storage, twitter, QueueTweeter
-import dotenv
 from uuid import uuid4
 
-
-dotenv.load_dotenv()
 
 sa = storage.Auth(
         connection_string=os.environ.get("AZURE_STORAGE_CONNECTION_STRING"),
@@ -26,10 +23,10 @@ sa = storage.Auth(
 )
 
 ta = twitter.Auth(
-        consumer_key=os.environ.get("TWITTER_CONSUMER_KEY"),
-        consumer_secret=os.environ.get("TWITTER_CONSUMER_SECRET"),
-        access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
-        access_token_secret=os.environ.get("TWITTER_ACCESS_TOKEN_SECRET")
+    consumer_key=os.environ.get("TWITTER_CONSUMER_KEY"),
+    consumer_secret=os.environ.get("TWITTER_CONSUMER_SECRET"),
+    access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
+    access_token_secret=os.environ.get("TWITTER_ACCESS_TOKEN_SECRET"),
 )
 
 queue = QueueTweeter(storage_auth=sa, twitter_auth=ta)
@@ -80,7 +77,10 @@ def index():
 @app.route('/send/<message_id>', methods=['POST'])
 def tweet(message_id):
     get_message(message_id)
-    queue.send_next_message(message_transformer=lambda x: json.loads(x)['msg'])
+    queue.send_next_message(
+        message_transformer=lambda x: {"text": json.loads(x)['msg']},
+        delete_after=True,
+        )
     msgs = get_messages()
     form=AddMessage()
     return render_template('message.html', msgs=msgs, form=form)
