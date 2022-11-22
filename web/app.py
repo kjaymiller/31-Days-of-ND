@@ -7,7 +7,7 @@ import json
 
 from uuid import uuid4
 
-from .messages import get_messages, get_message
+from . import messages
 from .queue import queue as q
 from .form import AddMessage
 
@@ -20,27 +20,31 @@ except:
 app = Flask(__name__)
 app.secret_key = str(uuid4())
 
+def rebuild(template_name:str):
+    msgs = messages.get_messages(queue = q.queue)
+    form = AddMessage()
+    return render_template(template_name, msgs=msgs, form=form)
+
+
+
 @app.route('/')
 def index():
-    msg = get_messages(queue = q.queue)
-    form = AddMessage()
-    return render_template('index.html', msgs=msg, form=form)
+    return rebuild('index.html')
 
 
 @app.route('/send/<message_id>', methods=['POST'])
 def tweet(message_id):
-    get_message(id=message_id, queue=q.queue)
+    messages.get_message(id=message_id, queue=q.queue)
     q.send_next_message(
         message_transformer=lambda msg: {"text": json.loads(msg)['msg']},
         delete_after=True,
         )
-    msgs = get_messages(queue=q.queue)
-    form=AddMessage()
-    return render_template('message.html', msgs=msgs, form=form)
+    return rebuild('message.html')
 
 
 @app.route('/message', methods=["POST"])
 def add_message():
+    #Because we are parsing the form data we do not use rebuild
     form = AddMessage()
 
     if form.validate_on_submit():
@@ -54,16 +58,21 @@ def add_message():
         for error in form.errors:
             flash(error, "error")
 
-    msgs = get_messages()
+    msgs = messages.get_messages()
     return render_template('message.html', msgs=msgs, form=form)
 
-@app.route('/clear', methods=["POST"])
-def clear():
+@app.route('/clear_all', methods=["POST"])
+def clear_all():
     q.queue.clear_messages()
     flash("Queue Cleared", "success")
-    form = AddMessage()
-    msgs = get_messages()
-    return render_template('message.html', msgs=msgs, form=form)
+    return rebuild('message.html')
+
+@app.route('/delete/<message_id>', methods=["POST"])
+def delete_one(message_id):
+    messages.delete_message(message_id=message_id, queue=q.queue)
+    flash("Message Deleted", "success")
+    return rebuild('message.html')
+
 
 if __name__ == '__main__':
     app.run() 

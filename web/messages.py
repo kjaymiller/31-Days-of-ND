@@ -18,11 +18,18 @@ def get_message(id, queue: QueueClient, max_tries=20):
     message = queue.peek_messages()[0]
     attempt = 0
 
-    while message.id != id or attempt < max_tries:
+    while message['id'] != id or attempt < max_tries:
         message = queue.peek_messages()[0]
 
-        if message.id == id:
+        if message['id'] == id:
             return message
 
         attempt += 1
         message = queue.receive_message(visibility_timeout=1)
+
+
+def delete_message(message_id, queue: QueueClient):
+    """Deletes a message from the queue"""
+    get_message(message_id, queue)
+    message = queue.receive_message(visibility_timeout=1)
+    return queue.delete_message(message=message, pop_receipt=message['pop_receipt'])
