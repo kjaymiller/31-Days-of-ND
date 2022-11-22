@@ -16,4 +16,3 @@ class AddMessage(FlaskForm):
             default=datetime.now(),
             format='%Y-%m-%dT%H:%M',
     )
-    

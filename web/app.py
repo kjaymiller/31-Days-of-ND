@@ -17,7 +17,6 @@ except:
     pass
 
 
-
 app = Flask(__name__)
 app.secret_key = str(uuid4())
 
