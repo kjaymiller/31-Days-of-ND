@@ -1,7 +1,14 @@
 {% if msgs %}
     {% for message in msgs %}
-        <p>{{message.content.msg}} <button hx-trigger="click" hx-post="{{url_for('tweet', message_id=message.id)}}" hx-target="#message">Tweet That<button></p> 
-        <small>scheduled for {{message.content.date}}</small>
+    <div>
+        <p>
+            {{message.content.msg}}
+            <small>scheduled for {{message.content.date}}</small>
+            <button hx-trigger="click" hx-post="{{url_for('tweet', message_id=message.id)}}" hx-target="#message">
+                Tweet That
+            </button>
+        </p> 
+    </div>
     {% endfor %}
 {% else %}
     <p>No messages. Add one now!</p>

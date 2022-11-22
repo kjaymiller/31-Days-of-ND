@@ -12,9 +12,12 @@ from wtforms import (
 
 import os
 import json
+
 from azure.storage.queue import QueueClient
 from azqueuetweeter import storage, twitter, QueueTweeter
 from uuid import uuid4
+
+from .messages import get_messages, get_message
 
 
 sa = storage.Auth(
@@ -23,10 +26,10 @@ sa = storage.Auth(
 )
 
 ta = twitter.Auth(
-    consumer_key=os.environ.get("TWITTER_CONSUMER_KEY"),
-    consumer_secret=os.environ.get("TWITTER_CONSUMER_SECRET"),
-    access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
-    access_token_secret=os.environ.get("TWITTER_ACCESS_TOKEN_SECRET"),
+        consumer_key=os.environ.get("TWITTER_CONSUMER_KEY"),
+        consumer_secret=os.environ.get("TWITTER_CONSUMER_SECRET"),
+        access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
+        access_token_secret=os.environ.get("TWITTER_ACCESS_TOKEN_SECRET"),
 )
 
 queue = QueueTweeter(storage_auth=sa, twitter_auth=ta)
@@ -39,30 +42,16 @@ except:
 
 
 class AddMessage(FlaskForm):
-    msg = TextAreaField("Message",
+    msg = TextAreaField(
+            "Message",
             render_kw={"style": "width:100%"},
-            )
+    )
     date = DateTimeLocalField(
             "Send At",
             default=datetime.now(),
             format='%Y-%m-%dT%H:%M',
     )
     
-
-def get_messages(count:int=10):
-    msgs = [{'id':msg['id'], "content":json.loads(msg['content'])} for msg in queue.queue.peek_messages(max_messages=count)]
-    return msgs
-
-def get_message(id):
-
-    message = queue.queue.peek_messages()[0]
-
-    while message.id != id:
-        message = queue.queue.peek_messages()[0]
-        message = queue.queue.receive_message()
-
-
-    return message
 
 app = Flask(__name__)
 app.secret_key = str(uuid4())
@@ -78,7 +67,7 @@ def index():
 def tweet(message_id):
     get_message(message_id)
     queue.send_next_message(
-        message_transformer=lambda x: {"text": json.loads(x)['msg']},
+        message_transformer=lambda msg: {"text": json.loads(msg)['msg']},
         delete_after=True,
         )
     msgs = get_messages()
