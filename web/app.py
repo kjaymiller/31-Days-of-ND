@@ -2,6 +2,8 @@ from flask import (
         Flask,
         render_template,
         flash,
+        redirect,
+        url_for,
 )
 import json
 
@@ -43,7 +45,7 @@ def tweet(message_id):
     return rebuild('message.html')
 
 
-@app.route('/message', methods=["POST"])
+@app.route('/message', methods=["GET", "POST"])
 def add_message():
     #Because we are parsing the form data we do not use rebuild
     form = AddMessage()
@@ -55,9 +57,10 @@ def add_message():
                 })
         )
         flash("Message Queued", "success")
-    else:
-        for error in form.errors:
-            flash(error, "error")
+        return redirect(url_for('add_message'))
+
+    for error in form.errors:
+        flash(error, "error")
 
     msgs = messages.get_messages(queue=q.queue)
     return render_template('message.html', msgs=msgs, form=form)

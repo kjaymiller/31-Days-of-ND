@@ -12,7 +12,7 @@ class AddMessage(FlaskForm):
             render_kw={"style": "width:100%"},
     )
     date = DateTimeLocalField(
-            "Send At",
+            "Send Automatically at",
             default=datetime.now(),
             format='%Y-%m-%dT%H:%M',
     )
