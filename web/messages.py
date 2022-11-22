@@ -13,16 +13,16 @@ def get_messages(queue: QueueClient, count:int=10):
     msgs = [{'id':msg['id'], "content":message_loader(msg)} for msg in queue.peek_messages(max_messages=count)]
     return msgs
 
-def get_message(id, max_tries=20):
+def get_message(id, queue: QueueClient, max_tries=20):
 
-    message = queue.queue.peek_messages()[0]
+    message = queue.peek_messages()[0]
     attempt = 0
 
     while message.id != id or attempt < max_tries:
-        message = queue.queue.peek_messages()[0]
+        message = queue.peek_messages()[0]
 
         if message.id == id:
             return message
 
         attempt += 1
-        message = queue.queue.receive_message(visibility_timeout=1)
+        message = queue.receive_message(visibility_timeout=1)
