@@ -10,7 +10,10 @@ html {font-family: 'Open Sans', sans-serif;}
     margin: 10px 0;
     border-left: 5px solid #66baff;
 }
-
+textarea {
+    font-size: larger;
+    padding: 1rem;
+}
 .message:hover {
     background-color: #ffffff;
 }
@@ -18,6 +21,11 @@ html {font-family: 'Open Sans', sans-serif;}
     background-size: auto;
     background-repeat: no-repeat;
     padding: 1rem;
+}
+
+
+.message_form>.section-head {
+    margin: 2rem 0;
 }
 
 .success {

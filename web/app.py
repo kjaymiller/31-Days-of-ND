@@ -10,6 +10,7 @@ from uuid import uuid4
 from . import messages
 from .queue import queue as q
 from .form import AddMessage
+import time
 
 try:
     q.queue.create_queue()
@@ -58,7 +59,7 @@ def add_message():
         for error in form.errors:
             flash(error, "error")
 
-    msgs = messages.get_messages()
+    msgs = messages.get_messages(queue=q.queue)
     return render_template('message.html', msgs=msgs, form=form)
 
 @app.route('/clear_all', methods=["POST"])
@@ -71,6 +72,7 @@ def clear_all():
 def delete_one(message_id):
     messages.delete_message(message_id=message_id, queue=q.queue)
     flash("Message Deleted", "success")
+    time.sleep(1.1) # Gives the queue time to update before we rebuild the page
     return rebuild('message.html')
 
 
